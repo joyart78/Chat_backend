@@ -1,0 +1,51 @@
+services:
+    app:
+        restart: no
+        build:
+            context: .
+
+            args:
+                MAX_WORKERS: ${MAX_WORKERS}
+
+        ports:
+            - ${PORT}:${PORT}
+
+        env_file:
+            - ./.env
+
+        entrypoint: [ "python", "run.py" ]
+
+        volumes:
+            - ${FILES_PATH_VOLUME}:/var/project/storage
+            - ./app:/var/project/app
+
+        environment:
+            - HOST=0.0.0.0
+
+        networks:
+            - local_net
+
+    postgres:
+        restart: "on-failure"
+        image: "postgres:17.6-alpine3.22"
+
+        env_file:
+          - ./.env
+
+        environment:
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - POSTGRES_DB=${DB_NAME}
+
+        ports:
+            - ${DB_PORT}:5432
+
+        volumes:
+            - ${POSTGRES_DATA_VOLUME}:/var/lib/postgresql/data
+
+        networks:
+            - local_net
+
+
+networks:
+    local_net:
