@@ -35,9 +35,7 @@ class AppConfig:
     port: int = int(os.environ.get("PORT", 8000))
 
     secret = os.environ.get("SECRET")
-    additional_debug: bool = (
-        os.environ.get("ADDITIONAL_DEBUG", "false").lower() == "true"
-    )
+    additional_debug: bool = os.environ.get("ADDITIONAL_DEBUG", "false").lower() == "true"
 
 
 class Config(AppConfig, AppSettings, DBConfig):

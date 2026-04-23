@@ -24,7 +24,6 @@ class UserInfo(Model):
     id: int
     login: str
 
-    created_at: datetime.datetime
     updated_at: datetime.datetime
 
     class Config:

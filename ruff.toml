@@ -1,0 +1,35 @@
+line-length = 120
+target-version = "py310"
+
+[lint]
+select = ["PLE", "F", "S", "B", "A", "ANN", "I", "C901", "N", "PERF", "FURB", "RUF", "ISC", "LOG", "PIE", "T20", "SIM", "TC", "PIE796", "TC004", "TRY002", "TRY400", "TRY401", "FAST001", "FAST003", "ASYNC110", "ASYNC210", "ASYNC221", "ASYNC222", "ASYNC230", "ASYNC251", "UP010", "RUF200", "PLR2004", "FAST001", "FAST003", "FBT003", "D101", "D102", "D103", "D419", "D418", "COM818", "C4", "T100", "FIX002", "FIX001", "G101", "G201", "G202", "G010", "RET503", "RET505", "RET508", "FLY002"]
+preview = true
+ignore = ["ANN401", "ANN204", "FURB101", "FURB103", "RUF002", "RUF003", "RUF001"]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D10", "D101", "D103", "S101", "ANN", "S106", "RUF013", "C901"]
+"tests/*/request.py" = ["RUF052"]
+"tests/*/requests.py" = ["RUF052"]
+"app/routes/*" = ["B008", "PLR0913", "C901"]
+"app/dependencies/*" = ["B008"]
+"app/cli/*" = ["T201", "S602"]
+"app/models/*" = ["D101", "N805"]
+"app/schemas/*" = ["D101", "D106", "N805", "N805", "D102", "N805", "FBT003", "FURB189"]
+"app/core/permissions.py" = ["D106", "N801"]
+"app/core/config.py" = ["FBT003", "D102", "D101"]
+"migrations/versions/*" = ["ANN201", "D103", "D101", "TC002", "F401"]
+"app/main.py" = ["RUF001"]
+"app/di_container.py" = ["D101"]
+
+[lint.mccabe]
+max-complexity = 6
+
+[lint.pylint]
+max-args = 7
+
+[format]
+line-ending = "lf"
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false

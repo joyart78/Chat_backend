@@ -21,9 +21,7 @@ def fresh_timestamp() -> Callable[[], datetime.datetime]:
 class TimestampMixin:
     @declared_attr
     def created_at(self) -> Mapped[datetime.datetime]:
-        return mapped_column(
-            "created_at", DateTime, default=fresh_timestamp(), nullable=False
-        )
+        return mapped_column("created_at", DateTime, default=fresh_timestamp(), nullable=False)
 
     @declared_attr
     def updated_at(self) -> Mapped[datetime.datetime | None]:

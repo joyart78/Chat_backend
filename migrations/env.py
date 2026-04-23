@@ -2,6 +2,7 @@ import pathlib
 import sys
 from logging.config import fileConfig
 
+import sqlalchemy
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
@@ -30,6 +31,35 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+IGNORE_TABLES = ["alembic_version"]
+
+
+def include_object(
+    object_: sqlalchemy.schema.Table | sqlalchemy.schema.Column,
+    name,
+    type_,
+    reflected,
+    compare_to,
+) -> bool:
+    """
+    Should you include this table or not?
+    """
+    # excludes with matched schema name, not only table itself
+    if isinstance(object_, sqlalchemy.schema.Table):
+        if object_.fullname in IGNORE_TABLES:
+            return False
+    elif object_.table in IGNORE_TABLES:
+        return False
+
+    if type_ == "table" and (name in IGNORE_TABLES or object_.info.get("skip_autogenerate", False)):
+        return False
+
+    if type_ == "column" and object_.info.get("skip_autogenerate", False):  # noqa: SIM103
+        return False
+
+    return True
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -48,6 +78,9 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
+        version_table_schema="public",
+        template_args={},
     )
 
     with context.begin_transaction():
@@ -68,7 +101,14 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            include_schemas=True,
+            version_table_schema="public",
+            include_object=include_object,
+            template_args={},
+        )
 
         with context.begin_transaction():
             context.run_migrations()

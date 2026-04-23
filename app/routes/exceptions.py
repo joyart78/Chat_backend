@@ -62,6 +62,4 @@ def add_exception_handlers(app: FastAPI) -> None:
         """
         Обработчик для ошибок авторизации.
         """
-        return JSONResponse(
-            ErrorSchema(detail=str(e)).model_dump(), status_code=HTTPStatus.UNAUTHORIZED
-        )
+        return JSONResponse(ErrorSchema(detail=str(e)).model_dump(), status_code=HTTPStatus.UNAUTHORIZED)

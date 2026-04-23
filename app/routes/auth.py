@@ -27,9 +27,7 @@ async def register(
 
     user = await session.scalar(select(User).where(User.login == data.login))
     if user:
-        raise fastapi.HTTPException(
-            HTTPStatus.CONFLICT, detail="Пользователь с таким логином уже есть"
-        )
+        raise fastapi.HTTPException(HTTPStatus.CONFLICT, detail="Пользователь с таким логином уже есть")
 
     user = User(**data.model_dump())
 
@@ -45,9 +43,7 @@ async def login(
     data: UserLogin = fastapi.Body(...),
 ) -> LoginOut:
     """Логин"""
-    unauthorized_error = fastapi.HTTPException(
-        HTTPStatus.UNAUTHORIZED, detail="Логин или пароль не верные"
-    )
+    unauthorized_error = fastapi.HTTPException(HTTPStatus.UNAUTHORIZED, detail="Логин или пароль не верные")
 
     user = await session.scalar(select(User).where(User.login == data.login))
     if not user:
@@ -75,26 +71,20 @@ async def generate_refresh_token(
         data = JWTGenerator._decode_jwt(token)
         info = RefreshTokenInfoOut(**data)
     except (pydantic.ValidationError, jwt.exceptions.DecodeError):
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="Неверный токен"
-        )
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Неверный токен")
     except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.ExpiredSignatureError):
         msg = "Ваш токен более недействителен, пожалуйста авторизуйтесь снова"
         raise NotAuthorizedError(msg)
 
     user = await session.scalar(select(User).where(User.id == info.user_id))
     if not user:
-        raise fastapi.HTTPException(
-            HTTPStatus.NOT_FOUND, detail="Пользователь не найден"
-        )
+        raise fastapi.HTTPException(HTTPStatus.NOT_FOUND, detail="Пользователь не найден")
     user_info = UserInfo.model_validate(user)
 
     user_last_update = user_info.updated_at.replace(tzinfo=None).timestamp()
     user_last_update_in_refresh = info.last_user_update.replace(tzinfo=None).timestamp()
     if int(user_last_update) != int(user_last_update_in_refresh):
-        raise NotAuthorizedError(
-            "Ваш токен более недействителен, пожалуйста авторизуйтесь снова"
-        )
+        raise NotAuthorizedError("Ваш токен более недействителен, пожалуйста авторизуйтесь снова")
 
     token = JWTGenerator.create_jwt(user_info, refresh_token=token)
 

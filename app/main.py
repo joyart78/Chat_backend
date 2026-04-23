@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from routes.auth import auth
+from routes.chat import chat
 
 app = FastAPI()
 
@@ -15,3 +16,4 @@ default_errors = {
 
 
 app.include_router(auth, prefix="/auth", tags=[" Auth"], responses=default_errors)
+app.include_router(chat, prefix="/chat", tags=["Chat"], responses=default_errors)

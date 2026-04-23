@@ -22,9 +22,7 @@ class JWTGenerator:
     JWT_SECRET = config.secret
     DEFAULT_ALGORITHM = "HS256"  # не менять просто так, на него завязана centrifugo
     TOKEN_ALIVE_HOURS = datetime.timedelta(hours=config.token_alive_hours)
-    REFRESH_TOKEN_ALIVE_HOURS = datetime.timedelta(
-        hours=config.refresh_token_alive_hours
-    )
+    REFRESH_TOKEN_ALIVE_HOURS = datetime.timedelta(hours=config.refresh_token_alive_hours)
 
     logger = logging.getLogger("JWTGenerator")
 
@@ -59,9 +57,7 @@ class JWTGenerator:
             ).model_dump(by_alias=True)
             refresh_token = cls._encode_jwt(refresh_info)
 
-        token_info = TokenInfo(
-            user=user, refresh_token=refresh_token, exp=expired_at, iat=created_at
-        )
+        token_info = TokenInfo(user=user, refresh_token=refresh_token, exp=expired_at, iat=created_at)
 
         token = cls._encode_jwt(token_info.model_dump(by_alias=True))
 
