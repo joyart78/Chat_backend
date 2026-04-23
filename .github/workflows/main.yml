@@ -1,0 +1,77 @@
+name: Deploy Backend
+
+# Запускается только при пуше в ветку main
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Разрешения нужны чтобы Actions мог пушить образ в ghcr.io
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+
+      # ─── Шаг 1 ───────────────────────────────────────────
+      # Скачиваем код репозитория на сервер GitHub (runner)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ─── Шаг 2 ───────────────────────────────────────────
+      # Авторизуемся в GitHub Container Registry (ghcr.io)
+      # GITHUB_TOKEN — автоматический токен, GitHub создаёт его сам
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─── Шаг 3 ───────────────────────────────────────────
+      # Собираем Docker-образ из Dockerfile и загружаем в ghcr.io
+      # После этого шага образ доступен по адресу:
+      # ghcr.io/joyart78/chat_backend:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/chat_backend:latest
+
+      # ─── Шаг 4 ───────────────────────────────────────────
+      # Подключаемся к серверу по SSH и запускаем обновление
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/deploy/app
+
+            # Скачиваем свежий образ с ghcr.io
+            docker pull ghcr.io/joyart78/chat_backend:latest
+
+            # Перезапускаем только контейнер бэкенда
+            # --no-deps = не трогать другие контейнеры (фронт, бд)
+            docker compose up -d --no-deps backend
+
+            # Удаляем старые образы чтобы не засорять диск
+            docker image prune -f
+
+      # ─── Шаг 5 ───────────────────────────────────────────
+      # Создаём GitHub Release — появится в разделе Releases репозитория
+      # generate_release_notes = автоматически собирает список коммитов
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Release #${{ github.run_number }}"
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
