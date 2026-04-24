@@ -27,3 +27,4 @@ app.add_middleware(
 
 app.include_router(auth, prefix="/auth", tags=[" Auth"], responses=default_errors)
 app.include_router(chat, prefix="/chat", tags=["Chat"], responses=default_errors)
+app.include_router(users, prefix="/users", tags=["Users"], responses=default_errors)
