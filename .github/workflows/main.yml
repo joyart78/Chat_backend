@@ -59,7 +59,7 @@ jobs:
 
             # Перезапускаем только контейнер бэкенда
             # --no-deps = не трогать другие контейнеры (фронт, бд)
-            docker compose up -d --no-deps backend
+            docker compose up --build -d
 
             # Удаляем старые образы чтобы не засорять диск
             docker image prune -f
