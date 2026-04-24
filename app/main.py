@@ -1,10 +1,30 @@
+import operator
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from routes.auth import auth
 from routes.chat import chat
+from routes.users import users
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "name": " Auth",
+        "description": "Роуты для авторизации/регистрации. В системе используется JWT авторизация.",
+    },
+    {
+        "name": "Users",
+        "description": "Роуты для взаимодействия с информацией о пользователях",
+    },
+]
+
+
+app = FastAPI(
+    openapi_tags=sorted(tags_metadata, key=operator.itemgetter("name")),
+    swagger_ui_parameters={
+        "docExpansion": "none",
+    },
+)
 
 
 default_errors = {
