@@ -1,6 +1,6 @@
 services:
     api: &main
-        restart: no
+        restart: always
         build:
             context: .
 

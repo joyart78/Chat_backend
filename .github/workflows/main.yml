@@ -54,12 +54,18 @@ jobs:
           script: |
             cd /home/deploy/app
 
+            # Обновляем репозиторий на сервере (docker-compose.yml должен быть актуальным)
+            git fetch --all --prune
+            git checkout master
+
             # Скачиваем свежий образ с ghcr.io
             docker pull ghcr.io/joyart78/chat_backend:latest
 
-            # Перезапускаем только контейнер бэкенда
-            # --no-deps = не трогать другие контейнеры (фронт, бд)
-            docker compose up -d --no-deps backend
+            # Поднимаем (или пересоздаём) все сервисы из docker-compose.yml
+            docker-compose up --build -d
+
+            # Для наглядности выводим список поднятых контейнеров
+            docker-compose ps
 
             # Удаляем старые образы чтобы не засорять диск
             docker image prune -f
