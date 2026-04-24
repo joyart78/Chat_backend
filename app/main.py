@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 from routes.auth import auth
 from routes.chat import chat
@@ -13,6 +14,20 @@ default_errors = {
     409: {"description": "Collision occurred. Entity already exists"},
     410: {"description": "Already Expired"},
 }
+
+
+origins = [
+    "http://localhost",
+    "http://77.91.94.81",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(auth, prefix="/auth", tags=[" Auth"], responses=default_errors)
