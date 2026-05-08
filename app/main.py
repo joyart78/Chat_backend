@@ -38,7 +38,7 @@ default_errors = {
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://77.91.94.81:5173"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
