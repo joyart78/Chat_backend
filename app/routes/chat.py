@@ -31,6 +31,7 @@ async def connect_to_chat(
         user = JWTGenerator.validate_jwt(user_token)
     except NotAuthorizedError:
         await authorized_error
+        return
 
     user_exist = await session.scalar(select(exists(User).where(User.id == user.id)))
     if not user_exist:
