@@ -10,7 +10,7 @@ from starlette import status
 from starlette.websockets import WebSocketDisconnect
 
 from core.exceptions import NotAuthorizedError
-from internal.chats import ws_connection_manager
+from internal.chats import ws_connection_manager, get_messages
 from models import ChatMessage, User
 from schemas.chat import ChatMessageCreate, ChatMessageBare
 from utils.auth.jwt_generator import JWTGenerator
@@ -20,11 +20,11 @@ chat = APIRouter()
 
 
 @chat.websocket("/ws")
-async def get_messages(
+async def connect_to_chat(
     websocket: WebSocket,
     session: AsyncSession = fastapi.Depends(db_async_session),
 ) -> None:
-    user_token = websocket.headers.get("authorization", "").replace("Bearer ", "")
+    user_token = websocket.query_params.get("token", "")
     authorized_error = websocket.close(status.WS_1008_POLICY_VIOLATION, reason="Ваш токен не действителен")
 
     try:
@@ -37,6 +37,8 @@ async def get_messages(
         await authorized_error
 
     await ws_connection_manager.add_socket_to_list(user.id, websocket)
+    # messages = await get_messages(session, rows_per_page=15, descending=True, sort_by="created_at")
+    # await ws_connection_manager.send_to_user(user.id, str(messages.data))
 
     is_active = True
     while is_active:
@@ -52,7 +54,7 @@ async def get_messages(
             await ws_connection_manager.send_to_all(str(message))
 
         except ValidationError as validation_error:
-            await ws_connection_manager.send_user_error(user.id, str(validation_error))
+            await ws_connection_manager.send_to_user(user.id, str(validation_error))
         except WebSocketDisconnect:
             await ws_connection_manager.remove_socket_from_list(user.id)
             is_active = False
